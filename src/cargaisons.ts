@@ -261,23 +261,35 @@ async function updateEtatGlobale(cargoId: string,currentState: string , etatAvan
 }
 
 
-async function updateEtatAvancement(cargoId: string, currentAvancement: string , etat_globale: string): Promise<void> {
+async function updateEtatAvancement(cargoId: string, currentAvancement: string, etat_globale: string): Promise<void> {
   const etatAvancementSelect = document.getElementById("etatAvancementSelect") as HTMLSelectElement;
   const newAvancement = etatAvancementSelect.value;
   console.log("mes etats:", cargoId, currentAvancement, etat_globale, newAvancement);
 
-  if (currentAvancement === "En cours" && etat_globale === "fermé") {
-    if (currentAvancement === "En cours" && etat_globale === "fermé") {
-      showNotification("La cargaison est ferme et en cours.");
-      if (newAvancement != "Terminé" && newAvancement != "Perdue") {
-        showNotification("La cargaison est fermée et en cours. Vous ne pouvez choisir que 'Terminé' ou 'Perdue'.");
-        etatAvancementSelect.value = currentAvancement;
-        return; 
-      }
-    }
+  if (currentAvancement === "En cours" && etat_globale === "fermé" && (newAvancement !== "Terminé" && newAvancement !== "Perdue")) {
+    showNotification("La cargaison est fermée et en cours. Vous ne pouvez choisir que 'Terminé' ou 'Perdue'.");
+    etatAvancementSelect.value = currentAvancement;
+    return;
   }
 
   try {
+    const cargoIdNumber = parseInt(cargoId); // Conversion de cargoId en nombre
+    const cargoDetails = await fetchCargoDetails(cargoIdNumber);
+
+    if (!cargoDetails) {
+      showNotification("Erreur lors de la récupération des détails de la cargaison.");
+      return;
+    }
+
+    console.log("Détails de la cargaison récupérés:", cargoDetails); // Debugging
+
+    // Nouvelle condition pour empêcher de changer l'état à "En cours" si la cargaison n'a pas de produits
+    if (currentAvancement === "En attente" && (!cargoDetails.produits || cargoDetails.produits.length === 0)) {
+      showNotification("La cargaison doit contenir au moins un produit pour être mise en cours.");
+      etatAvancementSelect.value = currentAvancement;
+      return;
+    }
+
     const response = await fetch(`../php/api.php`, {
       method: "POST",
       headers: {
@@ -285,28 +297,26 @@ async function updateEtatAvancement(cargoId: string, currentAvancement: string ,
       },
       body: JSON.stringify({
         action: "changerEtatAvancement",
-        idcargo: parseInt(cargoId),
+        idcargo: cargoIdNumber,
         newAvancement: newAvancement,
       }),
     });
+
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
+
     const result = await response.json();
-    console.log(
-      "Etat d'avancement de la cargaison mis à jour :",
-      newAvancement
-    );
+    console.log("Etat d'avancement de la cargaison mis à jour :", newAvancement);
     
     fetchCargos();
   } catch (error) {
-    console.error(
-      "Erreur lors de la mise à jour de l'état d'avancement:",
-      error
-    );
+    console.error("Erreur lors de la mise à jour de l'état d'avancement:", error);
     showNotification("Erreur lors de la mise à jour de l'état d'avancement !");
   }
 }
+
+
 
 
 function createCargo(cargo: Cargaison_Proprety): HTMLTableRowElement {
@@ -497,8 +507,9 @@ function displayCargoDetails(cargoDetails: any, cargoId: number): void {
             <p class="text-black">${cargo.lieu_arrivee || "N/A"}</p>
           </div>
           <div class="bg-purple-100  rounded-lg shadow-md p-6">
-            <h2 class="text-lg text-purple-600 font-semibold mb-4">État global</h2>
-            <p class="text-black">${cargo.etat_globale || "N/A"}</p>
+            <h2 class="text-lg text-purple-600 font-semibold mb-4">Prix Total</h2>
+            <span id="totalCost" class="text-black"> </span>
+            <span>F CFA</span>
           </div>
           <div class="bg-purple-100  rounded-lg shadow-md p-6">
             <h2 class="text-lg text-purple-600 font-semibold mb-4">Type</h2>
@@ -526,6 +537,7 @@ function displayCargoDetails(cargoDetails: any, cargoId: number): void {
             </select>
             <input type="hidden" id="etatGlobal" value="${cargo.etat_globale}">
           </div>
+
         </div>
         <h2 class="text-2xl text-black-700 font-bold mt-8">Produits:</h2>
         <div class="overflow-x-auto">
@@ -558,7 +570,15 @@ function displayCargoDetails(cargoDetails: any, cargoId: number): void {
 
       const productTable = document.getElementById("productTable");
       if (productTable) {
+        let totalCost = 0; // Variable pour stocker le coût total initial de la cargaison
         cargo.produits.forEach((produit: any) => {
+          console.log("Produit:", produit.prixProduit , produit.poidsProduit , produit.distanceKm) ;
+          
+          // Calcul du coût pour chaque produit
+          const cost = produit.poidsProduit *  produit.prixProduit ;
+          console.log("Cost:", cost);
+          
+          totalCost += cost; // Ajouter le coût de ce produit au coût total
           productTable.innerHTML += `
             <tr class="border-b border-gray-200 hover:bg-gray-100">
               <td class="py-3 px-6 text-left">${produit.libelleProduit}</td>
@@ -574,7 +594,14 @@ function displayCargoDetails(cargoDetails: any, cargoId: number): void {
             </tr>
           `;
         });
+
+        // Mettre à jour le coût total affiché
+        const totalCostElement = document.getElementById("totalCost");
+        if (totalCostElement) {
+          totalCostElement.textContent = totalCost.toString();
+        }
       }
+
       cargoDetailsDiv.classList.remove("hidden");
       document.querySelectorAll(".delete-product").forEach(button => {
         button.addEventListener("click", handleDeleteProduct);

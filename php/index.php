@@ -1,5 +1,5 @@
 <?php
-$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$page = isset($_GET['page']) ? $_GET['page'] : 'home'; // Modification de la valeur par défaut
 ?>
 
 <!DOCTYPE html>
@@ -19,6 +19,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
+    <?php 
+        switch ($page) {
+            case 'dashboard':
+            case 'contact':
+            case 'cargaisons':
+            case 'cargaison_detail':
+    ?>
     <header class="bg-white shadow">
         <?php include 'Components/navbar.php'; ?>
     </header>
@@ -42,14 +49,22 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
                     include 'cargaison_detail.php';
                     break;
                 default:
-                    include 'dashboard.php';
+                    include 'home.php'; // Charger la page home.php par défaut
             }
             ?>
         </main>
     </div>
-
     <footer class="bg-white p-4 shadow mt-auto">
         <?php include 'Components/footer.php'; ?>
     </footer>
+    <?php
+                break;
+            case 'login':
+                include 'login.php'; // Charger la page login.php si la valeur de page est 'login'
+                break;
+            default:
+                include 'home.php'; // Charger la page home.php par défaut
+        }
+    ?>
 </body>
 </html>

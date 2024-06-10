@@ -49,7 +49,7 @@ function envoyerMail($cargo) {
 
 
 function sender($mail, $info){
-    $mail->setFrom('papis.g.98@gmail.com', 'Votre Compagnie de Transport');
+    $mail->setFrom('papis.g.98@gmail.com', 'Votre Compagnie de Transport de cargaisons');
     $mail->addAddress($info["mail"]);
     $mail->isHTML(true);
     $mail->Subject = $info["sujet"];

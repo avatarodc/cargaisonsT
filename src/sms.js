@@ -26,4 +26,4 @@ function sendSms(phoneNumber1, phoneNumber2, message) {
         .catch(function (error) { return console.error(error); });
 }
 // Exemple d'utilisation
-sendSms("221777131720", "221778133537", "Bonjour mon pere ceci est un teste pour mon message.");
+// sendSms("221777131720", "221778133537", "Bonjour mon pere ceci est un teste pour mon message.");

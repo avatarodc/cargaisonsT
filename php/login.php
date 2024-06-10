@@ -1,3 +1,40 @@
+<?php
+// Démarrez la session
+session_start();
+
+// Vérifie si les données POST ont été soumises
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupère les données du formulaire de connexion
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+
+    // Charge les utilisateurs depuis le fichier JSON
+    $usersData = file_get_contents('users.json');
+    $users = json_decode($usersData, true);
+
+    // Vérifie les informations de connexion
+    $loggedIn = false;
+    foreach ($users as $user) {
+        if ($user['username'] === $username && $user['password'] === $password) {
+            $loggedIn = true;
+            // Définit une variable de session pour indiquer que l'utilisateur est connecté
+            $_SESSION['username'] = $username;
+            break;
+        }
+    }
+
+    // Si les informations de connexion sont valides, redirige vers le dashboard
+    if ($loggedIn) {
+        header("Location: http://www.mamadou.gueye:8777/GPduMonde/php/index.php?page=cargaisons");
+        exit;
+    } else {
+        // Sinon, affiche un message d'erreur
+        echo "Nom d'utilisateur ou mot de passe incorrect.";
+    }
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,32 +62,23 @@
             </div>
             <span class="font-bold mt-4 mb-4 text-[1.5rem]">Bienvenue dans GP-Monde</span>
             <div class="flex w-full">
-                <form class="max-w-sm mx-auto w-full ">
+                <form class="max-w-sm mx-auto w-full " method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                     <div class="mb-5">
-                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Your
-                            email</label>
-                        <input type="email" id="email"
-                            class=" border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            placeholder="name@gmail.com" required />
-                    </div>
-                    <div class="mb-5">
-                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Your
-                            password</label>
-                        <input type="password" id="password"
+                        <label for="username" class="block mb-2 text-sm font-medium text-gray-900">Nom
+                            d'utilisateur</label>
+                        <input type="text" id="username" name="username"
                             class="border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            required />
+                            placeholder="Nom d'utilisateur" required />
                     </div>
-                    <div class="flex items-start mb-5">
-                        <div class="flex items-center h-5">
-                            <input id="remember" type="checkbox" value=""
-                                class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-                                required />
-                        </div>
-                        <label for="remember" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember
-                            me</label>
+                    <div class="mb-5">
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Mot
+                            de passe</label>
+                        <input type="password" id="password" name="password"
+                            class="border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            placeholder="Mot de passe" required />
                     </div>
                     <button type="submit"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Connexion</button>
                 </form>
             </div>
         </div>

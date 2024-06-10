@@ -30,5 +30,5 @@ function sendSms(phoneNumber1: string, phoneNumber2: string, message: string) {
   }
   
   // Exemple d'utilisation
-//   sendSms("221777131720", "221778133537", "Bonjour mon pere ceci est un teste pour mon message.");
+  sendSms("221777131720", "221778133537", "Bonjour mon pere ceci est un teste pour mon message.");
   

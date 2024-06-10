@@ -19,6 +19,7 @@ export class Client {
 }
 
 export interface ProduitData {
+    emetteurTelephone(emetteurTelephone: any, recepteurTelephone: any, arg2: string): unknown;
     poidsProduit: number;
     libelle: string;
     poids: number;
